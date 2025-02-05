@@ -4,6 +4,7 @@ from scipy.spatial.transform import Rotation
 class Orientation:
     """
     A class to represent an orientation in 3D space using a quaternion.
+    Defined in FLU coordinate frame (x-forward,y-left, z-up)
     
     Attributes:
     qx (float): Quaternion x-component.
