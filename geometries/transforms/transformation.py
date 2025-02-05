@@ -43,7 +43,7 @@ class Transformation:
         
         return transformation_matrix
 
-    def apply_transformation(self, points):
+    def apply_transformation(self, points:np.ndarray):
         """
         Applies the transformation to a 3D point or an Nx3 array of points using the homogeneous transformation matrix.
         
@@ -53,50 +53,61 @@ class Transformation:
         Returns:
         np.array: Transformed 3D point(s) in the child frame.
         """
+
+        #make a copy of the points to transform
+        transformed_points = points.copy()
+
         # Check if points is a single point (3,) or an array of points (Nx3)
-        if points.ndim == 1 and points.shape == (3,):
+        if points.ndim == 1 and points.shape >= (3,):
+
             # Single point case: Convert the point to homogeneous coordinates (add a 1)
-            points_homogeneous = np.append(points, 1)
+            points_homogeneous = np.append(transformed_points[0:3], 1)
             # Apply the transformation matrix
             transformed_points_homogeneous = self.transformation_matrix.dot(points_homogeneous)
-            # Return the transformed point (the first three coordinates)
-            return transformed_points_homogeneous[:3]
+            # save the transformed point (the first three coordinates)
+            transformed_points[0:3] = transformed_points_homogeneous[:3]
+            return transformed_points
         
-        elif points.ndim == 2 and points.shape[1] == 3:
+        elif points.ndim == 2 and points.shape[1] >= 3:
             # Multiple points case (Nx3): Convert each point to homogeneous coordinates
-            points_homogeneous = np.hstack([points, np.ones((points.shape[0], 1))])  # Add a column of 1's
+            points_homogeneous = np.hstack([transformed_points[:,0:3], np.ones((points.shape[0], 1))])  # Add a column of 1's
             # Apply the transformation matrix to each point
             transformed_points_homogeneous = points_homogeneous.dot(self.transformation_matrix.T)
             # Return the transformed points (the first three columns)
-            return transformed_points_homogeneous[:, :3]
+            transformed_points[:,0:3] = transformed_points_homogeneous[:,:3]
+            return transformed_points
         
         else:
             raise ValueError("Input points must be a 3D point (3,) or an Nx3 array of points.")
 
     @classmethod
-    def from_global_poses(cls, parent_pose:Pose, child_pose:Pose):
+    def from_orig_to_new(cls, original_pose:Pose, new_pose:Pose):
         """
-        Initializes a Transformation object from the global poses of the parent and child frames.
-        The transform is initialized to go from parent to child
+        Initializes a Transformation object that goes from a parent class to a child pose
+        NOTE: the resulting transformation allows one to go from 
         
         Parameters:
-        parent_pose (Pose): geometries Pose object corresponding to the parent frame in the 
+        original_pose (Pose): geometries Pose object corresponding to the original frame in the 
             global reference frame
-        child_position (Pose): geometries Pose object corresponding to the parent frame in the 
+        new_pose (Pose): geometries Pose object corresponding to the new frame in the 
             global reference frame
         
         Returns:
         Transformation: A Transformation object initialized to transform from parent to child frame.
         """
-        # Compute the relative translation from parent to child
-        translation = child_pose.position._position - parent_pose.position._position
 
          # Compute the relative rotation quaternion from parent to child
-        parent_rotation_inv = Rotation.from_quat(parent_rotation).inv()  # Inverse of parent quaternion
-        relative_rotation = Rotation.from_quat(child_rotation).multiply(parent_rotation_inv)
+        original_rotation = Rotation.from_quat(original_pose.orientation._orientation)  # Inverse of parent quaternion
+        new_rotation_inv = Rotation.from_quat(new_pose.orientation._orientation).inv()
+        relative_rotation = new_rotation_inv * original_rotation
+
+        # Compute the relative translation from parent to child
+        translation = new_rotation_inv.apply(original_pose.position._position - new_pose.position._position)
 
         # Return an instance of the Transformation class with computed translation and rotation
         return cls(translation=translation, rotation=relative_rotation.as_quat())
+
+    
 
     @classmethod
     def from_global_poses_backup(cls, parent_position, parent_rotation, child_position, child_rotation):

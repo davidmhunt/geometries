@@ -70,14 +70,14 @@ class Orientation:
         return f"Orientation(qx={self.qx}, qy={self.qy}, qz={self.qz}, qw={self.qw})"
 
     @classmethod
-    def from_euler(cls, roll, pitch, yaw, degrees=False):
+    def from_euler(cls, roll:float=0.0, pitch:float=0.0, yaw:float=0.0, degrees=False):
         """
         Creates an Orientation object from Euler angles (roll, pitch, yaw).
         
         Parameters:
-        roll (float): Rotation around the x-axis in radians.
-        pitch (float): Rotation around the y-axis in radians.
-        yaw (float): Rotation around the z-axis in radians.
+        roll (float): Rotation around the x-axis in radians.Default is 0.0.
+        pitch (float): Rotation around the y-axis in radians. Default is 0.0.
+        yaw (float): Rotation around the z-axis in radians. Default is 0.0.
         degrees(bool): on True, given angles are in degrees. Else in radians.
             Defaults to False
         
