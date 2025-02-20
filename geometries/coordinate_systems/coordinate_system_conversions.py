@@ -58,7 +58,7 @@ def cartesian_to_spherical(points):
 
 def cylindrical_to_cartesian(points:np.ndarray)->np.ndarray:
     """
-    Convert an Nx3 array of spherical coordinates to Cartesian coordinates.
+    Convert an Nx3 array of cylindrical coordinates to Cartesian coordinates.
 
     Parameters:
         points (ndarray): Nx3 array where each row is (r, theta from x, z) in radians.
@@ -81,7 +81,7 @@ def cylindrical_to_cartesian(points:np.ndarray)->np.ndarray:
 
 def cartesian_to_cylindrical(points):
     """
-    Convert an Nx3 array of Cartesian coordinates to spherical coordinates.
+    Convert an Nx3 array of Cartesian coordinates to cylindrical coordinates.
 
     Parameters:
         points (ndarray): Nx3 array where each row is (x, y, z).
