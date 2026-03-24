@@ -45,7 +45,10 @@ def cartesian_to_spherical(points):
 
         r = np.sqrt(x**2 + y**2 + z**2)
         theta = np.arctan2(y, x)
-        phi = np.arccos(np.clip(z / r, -1, 1))  # Clip to avoid numerical issues
+        
+        safe_r = np.copy(r)
+        safe_r[safe_r == 0] = 1.0  # avoid division by zero
+        phi = np.arccos(np.clip(z / safe_r, -1, 1))
 
         return np.column_stack((r, theta, phi))
     
